@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Index</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+</head>
+<body>
+<!--form create-->
+<form id="create-form">
+    <input type="hidden" value="0" id="create-id">
+    <table>
+        <tr>
+            <th>Code</th>
+            <td><input type="text" id="create-code"></td>
+        </tr>
+        <tr>
+            <th>Date</th>
+            <td><input type="date" id="create-date"></td>
+        </tr>
+        <tr>
+            <th>Version</th>
+            <td><select name="version" id="create-version">
+                <option th:each="version:${versions}" th:text="${version.name}" th:value="${version.id}"></option>
+            </select></td>
+        </tr>
+        <tr>
+            <th><input type="submit" value="Save"></th>
+        </tr>
+    </table>
+</form>
+<!--table show all ide-->
+<table id="ide-table">
+    <tr>
+        <th>ID</th>
+        <th>Code</th>
+        <th>Date</th>
+        <th>Version</th>
+    </tr>
+    <tr th:each="ide:${ides}">
+        <td th:text="${ide.id}"></td>
+        <td th:text="${ide.code}"></td>
+        <td th:text="${ide.date}"></td>
+        <td th:text="${ide.version.name}"></td>
+    </tr>
+</table>
+<button id="more-ide">Show more</button>
+<script>
+    $(document).ready(function () {
+        $('#create-form').submit(function (event) {
+            let id = $('#create-id').val();
+            let code = $('#create-code').val();
+            let date = $('#create-date').val();
+            let version = {
+                "id": $('#create-version').val()
+            }
+            let newIde = {
+                "id": id, "code": code, "date": date, "version": version
+            }
+            console.log(newIde);
+            $.ajax({
+                headers: {
+                    'Accept': 'application/json', 'Content-Type': 'application/json'
+                },
+                type: "POST",
+                data: JSON.stringify(newIde),
+                url: "/ide/create",
+                success: function (ides) {
+                    $('#ide-table').html("<tr>\n" +
+                        "        <th>ID</th>\n" +
+                        "        <th>Code</th>\n" +
+                        "        <th>Date</th>\n" +
+                        "        <th>Version</th>\n" +
+                        "    </tr>");
+                    jQuery.each(ides, function (index, ide) {
+                        let row = "<tr>";
+                        row += "<td>" + ide.id + "</td>";
+                        row += "<td>" + ide.code + "</td>";
+                        row += "<td>" + ide.date + "</td>";
+                        row += "<td>" + ide.version.name + "</td>";
+                        row += "</tr>";
+                        $('#ide-table').append(row);
+                    })
+                }
+            })
+            event.preventDefault();
+        })
+        $('#more-ide').click(function (event) {
+            //todo: button, click to get more
+            event.preventDefault();
+        })
+    })
+</script>
+</body>
+</html>

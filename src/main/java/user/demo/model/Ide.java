@@ -7,7 +7,6 @@ import java.sql.Date;
 
 @Entity
 @Table
-@Data
 public class Ide {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -32,4 +32,10 @@ public class VersionController {
     public Version getSingleVersion(@PathVariable("id") Version version) {
         return version;
     }
+
+    @PutMapping("/update")
+    public Version updateVersion(@RequestBody Version version) {
+        versionService.update(version);
+        return version;
+    }
 }

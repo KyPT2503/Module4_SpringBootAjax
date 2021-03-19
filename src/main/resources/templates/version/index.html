@@ -4,14 +4,7 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
-          integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-    <!--<script src="../../static/jquery.js"></script>-->
 </head>
 <body>
 <form id="submit">
@@ -35,7 +28,7 @@
         </td>
     </tr>
 </table>
-<button onclick="f()">Click to run f()</button>
+<div id="form-place"></div>
 <script>
     $(document).ready(function () {
         $('#submit').submit(function (event) {
@@ -56,6 +49,7 @@
                     let newTr = "<tr>";
                     newTr += "<td>" + version.id + "</td>";
                     newTr += "<td>" + version.name + "</td>";
+                    newTr += "<td><button onclick='prepareUpdate(this)' id='" + version.id + "' class='update'>Update</button></td>";
                     newTr += "<td><button onclick='remove(this," + version.id + ")' class='remove' id='" + version.id + "'>Remove</button></td>";
                     newTr += "</tr>";
                     $('#table').append(newTr);
@@ -83,8 +77,10 @@
                 type: "GET",
                 url: "/version/" + button.attr("id"),
                 success: function (version) {
-                    $('#id').val(version.id);
-                    $('#name').val(version.name);
+                    let form = "<form id=\"update-form\" onclick='update()'><label for=\"update-id\">ID</label><input type=\"text\" id=\"update-id\" disabled><br><label for=\"update-name\">Name</label><input type=\"text\" id=\"update-name\"><br><input type=\"submit\" value=\"Update\"></form>";
+                    $('#form-place').append(form);
+                    $('#update-id').val(version.id);
+                    $('#update-name').val(version.name);
                 }
             })
         })
@@ -100,6 +96,46 @@
             success: function (message) {
                 console.log(message);
                 button.parent().parent().remove();
+            }
+        })
+    }
+
+    function prepareUpdate(node) {
+        $.ajax({
+            headers: {
+                'Accept': 'application/json', 'Content-Type': 'application/json'
+            },
+            type: "GET",
+            url: "/version/" + node.id,
+            success: function (version) {
+                let form = "<form id=\"update-form\" onclick='update()'><label for=\"update-id\">ID</label><input type=\"text\" id=\"update-id\" disabled><br><label for=\"update-name\">Name</label><input type=\"text\" id=\"update-name\"><br><input type=\"submit\" value=\"Update\"></form>";
+                $('#form-place').append(form);
+                $('#update-id').val(version.id);
+                $('#update-name').val(version.name);
+            }
+        })
+    }
+
+    function update() {
+        let id = $('#update-id').val();
+        let name = $('#update-name').val();
+        let newVersion = {"id": id, "name": name};
+        $.ajax({
+            headers: {
+                'Accept': 'application/json', 'Content-Type': 'application/json'
+            },
+            type: "PUT",
+            url: "/version/update",
+            data: JSON.stringify(newVersion),
+            success: function (version) {
+                //disable update form
+                $('#update-form').innerHTML = "";
+                //replace value of new version in table
+                let newRow = "<td>" + version.id + "</td>";
+                newRow += "<td>" + version.name + "</td>";
+                newRow += "<td><button id='" + version.id + "' class='update'>Update</button></td>";
+                newRow += "<td><button id='" + version.id + "' class='remove'>Remove</button></td>";
+                $(version.id).parent().parent().innerHTML = newRow;
             }
         })
     }
