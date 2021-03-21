@@ -40,7 +40,7 @@ public class IdeService implements IIdeService {
     }
 
     @Override
-    public Page<Ide> findAllForPageable(Pageable pageable) {
-        return ideRepository.findAll(pageable);
+    public List<Ide> findAllForPageable(Pageable pageable) {
+        return ideRepository.findAll(pageable).toList();
     }
 }

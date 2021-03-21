@@ -50,14 +50,18 @@
                     newTr += "<td>" + version.id + "</td>";
                     newTr += "<td>" + version.name + "</td>";
                     newTr += "<td><button onclick='prepareUpdate(this)' id='" + version.id + "' class='update'>Update</button></td>";
-                    newTr += "<td><button onclick='remove(this," + version.id + ")' class='remove' id='" + version.id + "'>Remove</button></td>";
+                    newTr += "<td><button class='remove' id='" + version.id + "'>Remove</button></td>";
                     newTr += "</tr>";
                     $('#table').append(newTr);
+
                 }
             })
             event.preventDefault();
         })
-        $('.remove').click(function (event) {
+        /*$('.remove').on("click",function () {
+            console.log("Button clicked after loaded ajax!");
+        })*/
+        $(document).on("click", ".remove", function () {
             let button = $(this);
             console.log($(this));
             $.ajax({
@@ -85,20 +89,6 @@
             })
         })
     });
-
-    function remove(node, id) {
-        let button = $(node);
-        console.log(button.attr("id"));
-        console.log(button);
-        $.ajax({
-            type: "DELETE",
-            url: '/version/remove/' + id,
-            success: function (message) {
-                console.log(message);
-                button.parent().parent().remove();
-            }
-        })
-    }
 
     function prepareUpdate(node) {
         $.ajax({

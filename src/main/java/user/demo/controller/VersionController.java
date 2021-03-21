@@ -6,6 +6,8 @@ import org.springframework.web.servlet.ModelAndView;
 import user.demo.model.Version;
 import user.demo.service.version.IVersionService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/version")
 public class VersionController {
@@ -31,6 +33,11 @@ public class VersionController {
     @GetMapping("/{id}")
     public Version getSingleVersion(@PathVariable("id") Version version) {
         return version;
+    }
+
+    @GetMapping("/all-version")
+    public List<Version> getAllVersion() {
+        return versionService.findAll();
     }
 
     @PutMapping("/update")

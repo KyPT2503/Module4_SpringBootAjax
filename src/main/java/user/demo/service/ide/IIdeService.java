@@ -5,6 +5,8 @@ import org.springframework.data.domain.Pageable;
 import user.demo.model.Ide;
 import user.demo.service.IGeneralService;
 
+import java.util.List;
+
 public interface IIdeService extends IGeneralService<Ide> {
-    Page<Ide> findAllForPageable(Pageable pageable);
+    List<Ide> findAllForPageable(Pageable pageable);
 }

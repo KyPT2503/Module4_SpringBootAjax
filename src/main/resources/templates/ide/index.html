@@ -43,11 +43,100 @@
         <td th:text="${ide.code}"></td>
         <td th:text="${ide.date}"></td>
         <td th:text="${ide.version.name}"></td>
+        <td>
+            <button class="update" th:id="${ide.id}">Update</button>
+        </td>
+        <td>
+            <button th:id="${ide.id}" class="remove">Remove</button>
+        </td>
     </tr>
 </table>
 <button id="more-ide">Show more</button>
 <script>
+    let page = 1;
+    $(document).on("click", "#do-update", function () {
+        let node = $(this);
+        let id = $('#update-id').val();
+        let code = $('#update-code').val();
+        let date = $('#update-date').val();
+        let version = {"id": $('#update-version').val()};
+        let ide = {
+            "id": id, "code": code, "date": date, "version": version
+        }
+        $.ajax({
+            headers: {
+                'Accept': 'application/json', 'Content-Type': 'application/json'
+            },
+            type: "PUT",
+            url: "/ide/update",
+            data: JSON.stringify(ide),
+            success: function (newIde) {
+                let row = "";
+                row += `<td> ${newIde.id}</td>`;
+                row += `<td> ${newIde.code}</td>`;
+                row += `<td> ${newIde.date}</td>`;
+                row += `<td> ${newIde.version.name}</td>`;
+                row += `<td><button class="update" id=${newIde.id}>Update</button></td>`;
+                row += `<td><button class="remove" id=${newIde.id}>Remove</button></td>`;
+                node.parent().parent().html(row);
+            }
+        })
+    })
+    $(document).on("click", ".update", function () {
+        let node = $(this);
+        let updateForm = "<td><input type=\"text\" value=\"id\" disabled id=\"update-id\"></td>\n" +
+            "        <td><input type=\"text\" value=\"code\" id=\"update-code\"></td>\n" +
+            "        <td><input type=\"date\" id=\"update-date\"></td>\n" +
+            "        <td>\n" +
+            "            <select name=\"version\" id=\"update-version\">\n" +
+            "            </select>\n" +
+            "        </td>\n" +
+            "        <td>\n" +
+            "            <button id=\"do-update\">UPDATE</button>\n" +
+            "        </td>";
+        node.parent().parent().html(updateForm);
+        $.ajax({
+            headers: {
+                'Accept': 'application/json', 'Content-Type': 'application/json'
+            },
+            type: "GET",
+            url: "/ide/" + node.attr("id"),
+            success: function (ide) {
+                $('#update-id').val(ide.id);
+                $('#update-code').val(ide.code);
+                $('#update-date').val(ide.date);
+            }
+        })
+        $.ajax({
+            headers: {
+                'Accept': 'application/json', 'Content-Type': 'application/json'
+            },
+            type: "GET",
+            url: "/version/all-version",
+            success: function (versions) {
+                let content = "";
+                jQuery.each(versions, function (index, version) {
+                    content += "<option value='" + version.id + "'>" + version.name + "</option>"
+                    //todo: selected version of updating IDE !!!
+                })
+                $('#update-version').html(content);
+            }
+        })
+    })
+    $(document).on("click", ".do-update", function () {
+        console.log("do-update clicked!");
+    })
     $(document).ready(function () {
+        $(document).on("click", ".remove", function () {
+            let node = $(this);
+            $.ajax({
+                type: "DELETE",
+                url: "/ide/remove/" + node.attr("id"),
+                success: function () {
+                    node.parent().parent().remove();
+                }
+            })
+        })
         $('#create-form').submit(function (event) {
             let id = $('#create-id').val();
             let code = $('#create-code').val();
@@ -73,24 +162,41 @@
                         "        <th>Date</th>\n" +
                         "        <th>Version</th>\n" +
                         "    </tr>");
-                    jQuery.each(ides, function (index, ide) {
-                        let row = "<tr>";
-                        row += "<td>" + ide.id + "</td>";
-                        row += "<td>" + ide.code + "</td>";
-                        row += "<td>" + ide.date + "</td>";
-                        row += "<td>" + ide.version.name + "</td>";
-                        row += "</tr>";
-                        $('#ide-table').append(row);
-                    })
+                    appendRow(ides);
                 }
             })
             event.preventDefault();
         })
         $('#more-ide').click(function (event) {
-            //todo: button, click to get more
+            $.ajax({
+                headers: {
+                    'Accept': 'application/json', "Content-Type": 'application/json'
+                },
+                type: "GET",
+                url: "/ide/more?page=" + page,
+                success: function (ides) {
+                    page += 1;
+                    console.log(ides);
+                    appendRow(ides);
+                }
+            })
             event.preventDefault();
         })
     })
+
+    function appendRow(ides) {
+        jQuery.each(ides, function (index, ide) {
+            let row = "<tr>";
+            row += "<td>" + ide.id + "</td>";
+            row += "<td>" + ide.code + "</td>";
+            row += "<td>" + ide.date + "</td>";
+            row += "<td>" + ide.version.name + "</td>";
+            row += `<td><button class="update" id=${ide.id}>Update</button></td>`;
+            row += `<td><button class="remove" id=${ide.id}>Remove</button></td>`;
+            row += "</tr>";
+            $('#ide-table').append(row);
+        })
+    }
 </script>
 </body>
 </html>

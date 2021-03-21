@@ -26,8 +26,8 @@ public class IdeController {
     }
 
     @GetMapping("")
-    public ModelAndView showIndexPage() {
-        return new ModelAndView("ide/index", "ides", ideService.findAll());
+    public ModelAndView showIndexPage(@PageableDefault(size = 3) Pageable pageable) {
+        return new ModelAndView("ide/index", "ides", ideService.findAllForPageable(pageable));
     }
 
     @PostMapping("/create")
@@ -38,6 +38,27 @@ public class IdeController {
 
     @GetMapping("/all")
     public List<Ide> getAllFollowPageable(@PageableDefault(size = 3) Pageable pageable) {
-        return (List<Ide>) ideService.findAllForPageable(pageable);
+        return ideService.findAllForPageable(pageable);
+    }
+
+    @GetMapping("/more")
+    public List<Ide> getMore(@PageableDefault(size = 3) Pageable pageable) {
+        return ideService.findAllForPageable(pageable);
+    }
+
+    @DeleteMapping("/remove/{id}")
+    public String remove(@PathVariable("id") Long id) {
+        ideService.remove(id);
+        return "Removed: " + id;
+    }
+
+    @PutMapping("/update")
+    public Ide update(@RequestBody Ide ide) {
+        return ideService.update(ide);
+    }
+
+    @GetMapping("/{id}")
+    public Ide getSingleIde(@PathVariable("id") Ide ide) {
+        return ide;
     }
 }
